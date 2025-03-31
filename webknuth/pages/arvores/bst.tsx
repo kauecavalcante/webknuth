@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { Dataset } from "../lib/types";
-import BSTTree from "../components/arvores/BSTTree";
-import styles from "../styles/bst.module.css";
+import { db } from "../../lib/firebase";
+import { Dataset } from "../../lib/types";
+import BSTTree from "../../components/arvores/BSTTree";
+import styles from "../../styles/bst.module.css";
 
 export default function BSTPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);

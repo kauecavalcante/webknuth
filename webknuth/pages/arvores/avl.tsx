@@ -1,20 +1,18 @@
-// pages/btree.tsx
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where, or } from "firebase/firestore";
-import { db } from "../lib/firebase";
-import { Dataset } from "../lib/types";
-import BTree from "../components/arvores/BTree";
-import styles from "../styles/bst.module.css";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../../lib/firebase";
+import { Dataset } from "../../lib/types";
+import BSTTree from "../../components/arvores/AVLTree";
+import styles from "../../styles/bst.module.css";
 
-export default function BTreePage() {
+export default function BSTPage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selected, setSelected] = useState<Dataset | null>(null);
 
   useEffect(() => {
     const fetchDatasets = async () => {
-      const snapshot = await getDocs(
-        query(collection(db, "datasets"), where("tipo", "in", ["bst", "avl"]))
-      );
+      const q = query(collection(db, "datasets"), where("tipo", "==", "avl"));
+      const snapshot = await getDocs(q);
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -28,7 +26,7 @@ export default function BTreePage() {
   return (
     <main className={styles.bstContainer}>
       <div className={styles.bstCard}>
-        <h1 className={styles.bstTitle}>Árvore B (B-Tree)</h1>
+        <h1 className={styles.bstTitle}>Árvore AVL (Balanceada)</h1>
 
         {!selected ? (
           <div>
@@ -56,7 +54,7 @@ export default function BTreePage() {
             </div>
 
             <div className={styles.bstTreeWrapper}>
-              <BTree values={selected.data} />
+              <BSTTree values={selected.data} />
             </div>
 
             <div style={{ textAlign: "center" }}>
