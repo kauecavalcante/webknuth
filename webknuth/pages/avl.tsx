@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { collection, getDocs, query, where } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { Dataset } from '../lib/types'
-import BSTTree from '../components/BSTTree'
+import BSTTree from '../components/AVLTree'
 import styles from '../styles/bst.module.css'
 
 export default function BSTPage() {
@@ -11,7 +11,7 @@ export default function BSTPage() {
 
   useEffect(() => {
     const fetchDatasets = async () => {
-      const q = query(collection(db, 'datasets'), where('tipo', '==', 'bst'))
+      const q = query(collection(db, 'datasets'), where('tipo', '==', 'avl'))
       const snapshot = await getDocs(q)
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -26,7 +26,7 @@ export default function BSTPage() {
   return (
     <main className={styles.bstContainer}>
       <div className={styles.bstCard}>
-        <h1 className={styles.bstTitle}>Árvore Binária de Busca (BST)</h1>
+        <h1 className={styles.bstTitle}>Árvore AVL (Balanceada)</h1>
 
         {!selected ? (
           <div>

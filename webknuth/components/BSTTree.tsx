@@ -35,17 +35,18 @@ export default function BSTTree({ values }: Props) {
     const rootData = buildBST(values);
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
-
+    
+    // ======== Area do desenho ======== // 
     const width = 600;
     const height = 400;
     const margin = 50;
 
     svg.attr("width", width).attr("height", height);
-
-    if (!rootData) return;
+    // =================================== //
+    if (!rootData) return; // se nao tiver nada ele n desenha nenhuma arvore.
 
     const root = d3.hierarchy(rootData, d =>
-        [d.left, d.right].filter((n): n is TreeNode => n !== null)
+        [d.left, d.right].filter((n): n is TreeNode => n !== null) // convertendo TreeNode em uma estrutura que o D3 consegue entende
       )
       
 
@@ -58,7 +59,7 @@ export default function BSTTree({ values }: Props) {
       .append("g")
       .attr("transform", `translate(${margin}, ${margin})`);
 
-    // Links
+    // linhas
     g.selectAll("line")
       .data(tree.links())
       .enter()
@@ -69,7 +70,7 @@ export default function BSTTree({ values }: Props) {
       .attr("y2", (d) => d.target.y)
       .attr("stroke", "#aaa");
 
-    // Nodes
+    // Circulo e o valor
     const nodeGroup = g
       .selectAll("g.node")
       .data(tree.descendants())

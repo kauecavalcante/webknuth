@@ -1,0 +1,83 @@
+.bstContainer {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-color: rgb(191, 201, 216);
+}
+
+.bstCard {
+  max-width: 700px;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 32px;
+}
+
+.bstTitle {
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.bstSubtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+
+.bstList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.bstList li {
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.bstButton {
+  background-color: #0066cc;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.bstButton:hover {
+  background-color: #004f99;
+}
+
+.bstClearButton {
+  background-color: #e53935;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  font-weight: bold;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background 0.2s ease-in-out;
+}
+
+.bstClearButton:hover {
+  background-color: #c62828;
+}
+
+.bstTreeWrapper {
+  margin: 30px auto;
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
