@@ -1,18 +1,20 @@
+// pages/btree.tsx
 import { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, getDocs, query, where, or } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Dataset } from "../lib/types";
-import BSTTree from "../components/arvores/BSTTree";
+import BTree from "../components/arvores/BTree";
 import styles from "../styles/bst.module.css";
 
-export default function BSTPage() {
+export default function BTreePage() {
   const [datasets, setDatasets] = useState<Dataset[]>([]);
   const [selected, setSelected] = useState<Dataset | null>(null);
 
   useEffect(() => {
     const fetchDatasets = async () => {
-      const q = query(collection(db, "datasets"), where("tipo", "==", "bst"));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(
+        query(collection(db, "datasets"), where("tipo", "in", ["bst", "avl"]))
+      );
       const data = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -26,7 +28,7 @@ export default function BSTPage() {
   return (
     <main className={styles.bstContainer}>
       <div className={styles.bstCard}>
-        <h1 className={styles.bstTitle}>Árvore Binária de Busca (BST)</h1>
+        <h1 className={styles.bstTitle}>Árvore B (B-Tree)</h1>
 
         {!selected ? (
           <div>
@@ -54,7 +56,7 @@ export default function BSTPage() {
             </div>
 
             <div className={styles.bstTreeWrapper}>
-              <BSTTree values={selected.data} />
+              <BTree values={selected.data} />
             </div>
 
             <div style={{ textAlign: "center" }}>

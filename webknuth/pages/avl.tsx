@@ -1,27 +1,27 @@
-import { useEffect, useState } from 'react'
-import { collection, getDocs, query, where } from 'firebase/firestore'
-import { db } from '../lib/firebase'
-import { Dataset } from '../lib/types'
-import BSTTree from '../components/AVLTree'
-import styles from '../styles/bst.module.css'
+import { useEffect, useState } from "react";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { Dataset } from "../lib/types";
+import BSTTree from "../components/arvores/AVLTree";
+import styles from "../styles/bst.module.css";
 
 export default function BSTPage() {
-  const [datasets, setDatasets] = useState<Dataset[]>([])
-  const [selected, setSelected] = useState<Dataset | null>(null)
+  const [datasets, setDatasets] = useState<Dataset[]>([]);
+  const [selected, setSelected] = useState<Dataset | null>(null);
 
   useEffect(() => {
     const fetchDatasets = async () => {
-      const q = query(collection(db, 'datasets'), where('tipo', '==', 'avl'))
-      const snapshot = await getDocs(q)
-      const data = snapshot.docs.map(doc => ({
+      const q = query(collection(db, "datasets"), where("tipo", "==", "avl"));
+      const snapshot = await getDocs(q);
+      const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
-      })) as Dataset[]
-      setDatasets(data)
-    }
+        ...doc.data(),
+      })) as Dataset[];
+      setDatasets(data);
+    };
 
-    fetchDatasets()
-  }, [])
+    fetchDatasets();
+  }, []);
 
   return (
     <main className={styles.bstContainer}>
@@ -30,15 +30,17 @@ export default function BSTPage() {
 
         {!selected ? (
           <div>
-            <p className={styles.bstSubtitle}>Escolha um conjunto para visualizar:</p>
+            <p className={styles.bstSubtitle}>
+              Escolha um conjunto para visualizar:
+            </p>
             <ul className={styles.bstList}>
-              {datasets.map(ds => (
+              {datasets.map((ds) => (
                 <li key={ds.id}>
                   <button
                     className={styles.bstButton}
                     onClick={() => setSelected(ds)}
                   >
-                    {ds.label} → [{ds.data.join(', ')}]
+                    {ds.label} → [{ds.data.join(", ")}]
                   </button>
                 </li>
               ))}
@@ -48,14 +50,14 @@ export default function BSTPage() {
           <div>
             <div className={styles.bstSubtitle}>
               <h2>{selected.label}</h2>
-              <p>[{selected.data.join(', ')}]</p>
+              <p>[{selected.data.join(", ")}]</p>
             </div>
 
             <div className={styles.bstTreeWrapper}>
               <BSTTree values={selected.data} />
             </div>
 
-            <div style={{ textAlign: 'center' }}>
+            <div style={{ textAlign: "center" }}>
               <button
                 className={styles.bstClearButton}
                 onClick={() => setSelected(null)}
@@ -67,5 +69,5 @@ export default function BSTPage() {
         )}
       </div>
     </main>
-  )
+  );
 }
