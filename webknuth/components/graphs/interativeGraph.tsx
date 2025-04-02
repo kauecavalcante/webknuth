@@ -9,10 +9,14 @@ import "vis-network/styles/vis-network.css";
 import styles from "../../styles/graph.module.css";
 
 export default function GraphComponent() {
+  // useState para armazenar os datasets
   const [datasets, setDatasets] = useState<Dataset[]>([]);
+  // useState para armazenar o dataset selecionado
   const [selected, setSelected] = useState<Dataset | null>(null);
+  // useState para armazenar a instância do gráfico
   const [network, setNetwork] = useState<Network | null>(null);
 
+  // useEffect para buscar os datasets do Firestore, filtrando por hash 
   useEffect(() => {
     const fetchDatasets = async () => {
       const q = query(collection(db, "datasets"), where("tipo", "==", "hash")); // Filtrando por hash
@@ -26,7 +30,7 @@ export default function GraphComponent() {
 
     fetchDatasets();
   }, []);
-
+// useEffect para criar o gráfico quando o dataset selecionado mudar
   useEffect(() => {
     if (selected) {
       const container = document.getElementById("network-container");

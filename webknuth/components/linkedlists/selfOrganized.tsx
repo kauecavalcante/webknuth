@@ -40,7 +40,7 @@ class SelfOrganizingList<T> {
       this.head = current;
     }
   }
-
+ /// Converte a lista encadeada em um array para facilitar a renderização
   toArray(): T[] {
     let arr: T[] = [];
     let current = this.head;
@@ -53,9 +53,13 @@ class SelfOrganizingList<T> {
 }
 
 export default function SelfOrganizingListComponent() {
+  // useState para armazenar a lista encadeada auto-organizável
+ 
   const [list] = useState(new SelfOrganizingList<number>());
   const [values, setValues] = useState<number[]>([]);
   const [inputValue, setInputValue] = useState("");
+ 
+  // Função para inserir um valor na lista encadeada e atualizar o estado da lista + função para mover um valor para o início da lista
 
   const handleInsert = () => {
     const value = parseInt(inputValue);
