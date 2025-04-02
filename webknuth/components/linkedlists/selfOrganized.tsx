@@ -1,15 +1,19 @@
-  //Define um nó de lista encadeada usando genéricos
+"use client";
+
+import React, { useState } from "react";
+import styles from "../../styles/list.module.css";
+
+// Define um nó da lista encadeada
 class ListNode<T> {
   value: T;
-  //Atributo que aponta para o próximo nó da lista, se não houver próximo nó, é nulo	
   next: ListNode<T> | null = null;
 
-  //Construtor que inicializa o nó com um valor
   constructor(value: T) {
     this.value = value;
   }
 }
 
+// Define a lista encadeada auto-organizável
 class SelfOrganizingList<T> {
   private head: ListNode<T> | null = null;
 
@@ -46,4 +50,54 @@ class SelfOrganizingList<T> {
     }
     return arr;
   }
+}
+
+export default function SelfOrganizingListComponent() {
+  const [list] = useState(new SelfOrganizingList<number>());
+  const [values, setValues] = useState<number[]>([]);
+  const [inputValue, setInputValue] = useState("");
+
+  const handleInsert = () => {
+    const value = parseInt(inputValue);
+    if (!isNaN(value)) {
+      list.insert(value);
+      setValues(list.toArray());
+      setInputValue("");
+    }
+  };
+
+  const handleMoveToFront = (value: number) => {
+    list.moveToFront(value);
+    setValues(list.toArray());
+  };
+
+  return (
+    <main className={styles.listContainer}>
+      <h1 className={styles.listTitle}>Lista Encadeada Auto-Organizável</h1>
+
+      <div className={styles.controls}>
+        <input
+          type="number"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          placeholder="Digite um número"
+          className={styles.input}
+        />
+        <button className={styles.listButton} onClick={handleInsert}>
+          Inserir
+        </button>
+      </div>
+
+      <ul className={styles.list}>
+        {values.map((value, index) => (
+          <li key={index} className={styles.listItem}>
+            {value}
+            <button className={styles.moveButton} onClick={() => handleMoveToFront(value)}>
+              Mover para Frente
+            </button>
+          </li>
+        ))}
+      </ul>
+    </main>
+  );
 }
