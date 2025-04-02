@@ -30,6 +30,7 @@
     "@types/d3": "^7.4.3",
     "@types/node": "^22.13.14",
     "@types/react": "^19.0.12",
+    "@types/vis": "^4.21.27",
     "typescript": "^5.8.2"
   }
 }
