@@ -2,83 +2,87 @@
 
 import { useEffect, useRef } from "react";
 import { Dataset } from "../../lib/types";
+import { useSimulacao } from "../../hooks/useSimulacao"; 
 
 interface Props {
-    dataset: Dataset;
+  dataset: Dataset;
 }
 
 export default function PerfectHashVisualizer({ dataset }: Props) {
-    const svgRef = useRef<SVGSVGElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
 
-    useEffect(() => {
-        const svg = svgRef.current;
-        if (!svg) return;
+  // Hook para simular inserção gradual
+  const currentValues = useSimulacao(dataset.data, 800);
 
-        // Limpa SVG
-        while (svg.firstChild) svg.removeChild(svg.firstChild);
+  useEffect(() => {
+    const svg = svgRef.current;
+    if (!svg) return;
 
-        const data = dataset.data;
-        const size = data.length; // Tamanho da tabela hash perfeita
+    // Limpa SVG
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
 
-        // Função de hash perfeita: usar posição no array original
-        const hashTable: (number | null)[] = new Array(size).fill(null);
-        for (let i = 0; i < data.length; i++) {
-            hashTable[i] = data[i];
-        }
+    const data = currentValues;
+    const size = dataset.data.length; // Tamanho fixo da tabela 
 
-        const boxSize = 60;
-        const spacing = 10;
+    // Função de hash perfeita: usar posição no array original
+    const hashTable: (number | null)[] = new Array(size).fill(null);
+    for (let i = 0; i < data.length; i++) {
+      hashTable[i] = data[i];
+    }
 
-        const width = size * (boxSize + spacing);
-        const height = 100;
+    const boxSize = 60;
+    const spacing = 10;
 
-        svg.setAttribute("width", width.toString());
-        svg.setAttribute("height", height.toString());
+    const width = size * (boxSize + spacing);
+    const height = 100;
 
-        const ns = "http://www.w3.org/2000/svg";
+    svg.setAttribute("width", width.toString());
+    svg.setAttribute("height", height.toString());
 
-        hashTable.forEach((value, index) => {
-            const x = index * (boxSize + spacing);
+    const ns = "http://www.w3.org/2000/svg";
 
-            // Retângulo
-            const rect = document.createElementNS(ns, "rect");
-            rect.setAttribute("x", x.toString());
-            rect.setAttribute("y", "20");
-            rect.setAttribute("width", boxSize.toString());
-            rect.setAttribute("height", boxSize.toString());
-            rect.setAttribute("fill", "#4f46e5");
-            rect.setAttribute("stroke", "#000");
-            svg.appendChild(rect);
+    hashTable.forEach((value, index) => {
+      const x = index * (boxSize + spacing);
 
-            // Texto: índice
-            const indexText = document.createElementNS(ns, "text");
-            indexText.setAttribute("x", (x + boxSize / 2).toString());
-            indexText.setAttribute("y", "15");
-            indexText.setAttribute("text-anchor", "middle");
-            indexText.setAttribute("font-size", "12");
-            indexText.textContent = `${index}`;
-            svg.appendChild(indexText);
+      // Retângulo
+      const rect = document.createElementNS(ns, "rect");
+      rect.setAttribute("x", x.toString());
+      rect.setAttribute("y", "20");
+      rect.setAttribute("width", boxSize.toString());
+      rect.setAttribute("height", boxSize.toString());
+      rect.setAttribute("fill", "#4f46e5");
+      rect.setAttribute("stroke", "#000");
+      svg.appendChild(rect);
 
-            // Texto: valor
-            if (value !== null) {
-                const text = document.createElementNS(ns, "text");
-                text.setAttribute("x", (x + boxSize / 2).toString());
-                text.setAttribute("y", "50");
-                text.setAttribute("text-anchor", "middle");
-                text.setAttribute("fill", "white");
-                text.setAttribute("font-size", "16");
-                text.textContent = value.toString();
-                svg.appendChild(text);
-            }
-        });
-    }, [dataset]);
+      // Texto: índice
+      const indexText = document.createElementNS(ns, "text");
+      indexText.setAttribute("x", (x + boxSize / 2).toString());
+      indexText.setAttribute("y", "15");
+      indexText.setAttribute("text-anchor", "middle");
+      indexText.setAttribute("font-size", "12");
+      indexText.textContent = `${index}`;
+      svg.appendChild(indexText);
 
-    return (
-        <div>
-            <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>
-                Hashing Perfeito (sem colisões)
-            </h3>
-            <svg ref={svgRef}></svg>
-        </div>
-    );
+      // Texto: valor
+      if (value !== null) {
+        const text = document.createElementNS(ns, "text");
+        text.setAttribute("x", (x + boxSize / 2).toString());
+        text.setAttribute("y", "50");
+        text.setAttribute("text-anchor", "middle");
+        text.setAttribute("fill", "white");
+        text.setAttribute("font-size", "16");
+        text.textContent = value.toString();
+        svg.appendChild(text);
+      }
+    });
+  }, [currentValues, dataset]);
+
+  return (
+    <div>
+      <h3 style={{ textAlign: "center", marginBottom: "1rem" }}>
+        Hashing Perfeito (sem colisões)
+      </h3>
+      <svg ref={svgRef}></svg>
+    </div>
+  );
 }

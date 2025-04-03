@@ -2,6 +2,7 @@
 
 import { Dataset } from "../../lib/types";
 import { useEffect, useRef } from "react";
+import { useSimulacao } from "../../hooks/useSimulacao"; 
 
 interface Props {
     dataset: Dataset;
@@ -12,6 +13,9 @@ const tableSize = 10;
 
 export default function CollisionStrategiesVisualizer({ dataset }: Props) {
     const svgRef = useRef<SVGSVGElement>(null);
+
+    // Hook de simulação para inserção gradual
+    const currentValues = useSimulacao(dataset.data, 800); 
 
     // Função base de hash
     const hash = (x: number) => x % tableSize;
@@ -24,14 +28,14 @@ export default function CollisionStrategiesVisualizer({ dataset }: Props) {
 
     // 1) Encadeamento
     const chainTable: number[][] = Array.from({ length: tableSize }, () => []);
-    dataset.data.forEach((x) => {
+    currentValues.forEach((x) => {
         const idx = hash(x);
         chainTable[idx].push(x);
     });
 
     // 2) Sondagem Linear
     const linearTable: (number | null)[] = new Array(tableSize).fill(null);
-    dataset.data.forEach((x) => {
+    currentValues.forEach((x) => {
         let idx = hash(x);
         let count = 0;
         while (linearTable[idx] !== null && count < tableSize) {
@@ -43,7 +47,7 @@ export default function CollisionStrategiesVisualizer({ dataset }: Props) {
 
     // 3) Duplo Hashing
     const doubleTable: (number | null)[] = new Array(tableSize).fill(null);
-    dataset.data.forEach((x) => {
+    currentValues.forEach((x) => {
         let idx = hash(x);
         const step = h2(x);
         let count = 0;
@@ -249,7 +253,7 @@ export default function CollisionStrategiesVisualizer({ dataset }: Props) {
         // Linha 3: Duplo Hashing
         const yDuplo = ySondagem + otherRowHeight;
         drawDuploHashing(yDuplo, doubleTable);
-    }, [dataset]);
+    }, [currentValues]); 
 
     return (
         <div style={{ textAlign: "center" }}>
