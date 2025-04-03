@@ -1,4 +1,3 @@
-// pages/btree.tsx
 import { useEffect, useState } from "react";
 import { collection, getDocs, query, where, or } from "firebase/firestore";
 import { db } from "../../lib/firebase";

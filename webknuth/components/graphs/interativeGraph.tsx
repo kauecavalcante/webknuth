@@ -7,6 +7,7 @@ import { Dataset } from "../../lib/types";
 import { Network } from "vis-network";
 import "vis-network/styles/vis-network.css";
 import styles from "../../styles/graph.module.css";
+import { useSimulacao } from "../../hooks/useSimulacao"; 
 
 export default function GraphComponent() {
   // useState para armazenar os datasets
@@ -15,6 +16,9 @@ export default function GraphComponent() {
   const [selected, setSelected] = useState<Dataset | null>(null);
   // useState para armazenar a instância do gráfico
   const [network, setNetwork] = useState<Network | null>(null);
+
+  // useSimulacao simula inserção gradual dos dados do conjunto
+  const currentValues = useSimulacao(selected?.data || [], 700);
 
   // useEffect para buscar os datasets do Firestore, filtrando por hash 
   useEffect(() => {
@@ -30,13 +34,14 @@ export default function GraphComponent() {
 
     fetchDatasets();
   }, []);
-// useEffect para criar o gráfico quando o dataset selecionado mudar
+
+  // useEffect para criar o gráfico quando o dataset selecionado mudar
   useEffect(() => {
     if (selected) {
       const container = document.getElementById("network-container");
       if (!container) return;
 
-      const nodes = selected.data.map((value, index) => ({
+      const nodes = currentValues.map((value, index) => ({
         id: index,
         label: value.toString(),
       }));
@@ -56,7 +61,7 @@ export default function GraphComponent() {
       const networkInstance = new Network(container, data, options);
       setNetwork(networkInstance);
     }
-  }, [selected]);
+  }, [selected, currentValues]); // ← inclui currentValues para atualizar com simulação
 
   return (
     <main className={styles.graphContainer}>

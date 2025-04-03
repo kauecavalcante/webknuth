@@ -5,29 +5,32 @@ import * as d3 from "d3";
 import { useSimulacao } from "../../hooks/useSimulacao";
 
 interface Props {
-  values: number[];
+  values: number[]; //Props: o componente espera receber um array de números chamado values
 }
 
-interface TreeNode {
+interface TreeNode { // TreeNode: estrutura de um nó da árvore AVL (com valor, filhos e altura)
   value: number;
   left: TreeNode | null;
   right: TreeNode | null;
   height: number;
 }
 
+// Funcoes para a avl!!
+
+
 function getHeight(node: TreeNode | null): number {
-  return node ? node.height : 0;
+  return node ? node.height : 0; // Retorna a altura do nó (ou 0 se for null)
 }
 
 function updateHeight(node: TreeNode): void {
-  node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right));
+  node.height = 1 + Math.max(getHeight(node.left), getHeight(node.right)); // Atualiza a altura de um nó com base nas alturas dos filhos.
 }
 
 function getBalance(node: TreeNode | null): number {
-  return node ? getHeight(node.left) - getHeight(node.right) : 0;
+  return node ? getHeight(node.left) - getHeight(node.right) : 0; // Calcula o fator de balanceamento do nó (esquerda - direita)
 }
 
-function rotateRight(y: TreeNode): TreeNode {
+function rotateRight(y: TreeNode): TreeNode { // rotação simples à direita
   const x = y.left!;
   const T2 = x.right;
 
@@ -40,7 +43,7 @@ function rotateRight(y: TreeNode): TreeNode {
   return x;
 }
 
-function rotateLeft(x: TreeNode): TreeNode {
+function rotateLeft(x: TreeNode): TreeNode { // rotação simples à esquerda
   const y = x.right!;
   const T2 = y.left;
 
@@ -53,7 +56,7 @@ function rotateLeft(x: TreeNode): TreeNode {
   return y;
 }
 
-function insertAVL(node: TreeNode | null, value: number): TreeNode {
+function insertAVL(node: TreeNode | null, value: number): TreeNode { // Insere recursivamente um valor na árvore AVL, Após inserir, atualiza a altura e faz rotações se necessário ignorando valores duplicado s
   if (!node) return { value, left: null, right: null, height: 1 };
 
   if (value < node.value) {
@@ -81,7 +84,7 @@ function insertAVL(node: TreeNode | null, value: number): TreeNode {
   return node;
 }
 
-function buildAVL(values: number[]): TreeNode | null {
+function buildAVL(values: number[]): TreeNode | null { // Constrói a árvore inserindo os valores um a um, mantendo balanceada com as funções anteriores.
   let root: TreeNode | null = null;
   for (const value of values) {
     root = insertAVL(root, value);
@@ -93,7 +96,7 @@ export default function AVLTree({ values }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
   const currentValues = useSimulacao(values, 800); // Simulação gradual
 
-  useEffect(() => {
+  useEffect(() => { // para desenhar com D3
     const rootData = buildAVL(currentValues);
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
@@ -114,7 +117,7 @@ export default function AVLTree({ values }: Props) {
 
     const g = svg.append("g").attr("transform", `translate(${margin}, ${margin})`);
 
-    g.selectAll("line")
+    g.selectAll("line") // Desenha os elementos
       .data(tree.links())
       .enter()
       .append("line")
@@ -139,7 +142,17 @@ export default function AVLTree({ values }: Props) {
       .attr("dy", 5)
       .attr("text-anchor", "middle")
       .attr("fill", "white");
-  }, [currentValues]);
+  }, [currentValues]); // Toda vez que currentValues mudar (a cada valor novo), redesenha a árvore.
 
   return <svg ref={svgRef}></svg>;
 }
+
+
+
+
+// Resumo:
+// Recebe uma lista de números.
+// Simula a inserção gradual em uma árvore AVL.
+// Usa D3.js para renderizar a árvore dinamicamente em SVG.
+// Aplica balanceamento automático (AVL) com rotações.
+// É ideal para visualizações educativas e entendimento de balanceamento de árvores.

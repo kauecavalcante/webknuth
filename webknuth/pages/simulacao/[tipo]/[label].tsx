@@ -1,5 +1,5 @@
 "use client";
-
+// Exibir os dados de uma simulação compartilhada através de um link 
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styles from "../../../styles/SharedSimulation.module.css";
@@ -10,22 +10,22 @@ type Simulacao = {
   label: string;
   data: number[];
   tipo: string;
-};
+}; // Definindo o formatdo dos dados que serão exibidos na página
 
 export default function SimulacaoPage() {
   const router = useRouter();
   const { tipo, label } = router.query;
 
-  const [dados, setDados] = useState<Simulacao | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [dados, setDados] = useState<Simulacao | null>(null); // dados: simulação encontrada no Firebase.
+  const [loading, setLoading] = useState(true); // loading: indica se está carregando os dados.
 
   useEffect(() => {
-    if (!tipo || !label) return;
+    if (!tipo || !label) return; // Só executa quando tipo e label estiverem disponíveis
 
     const fetchSimulacao = async () => {
       try {
-        const colecao = collection(db,tipo === "universal" || tipo === "colisoes" || tipo === "perfect" ? "hashing" : "datasets");
-        const q = query(colecao, where("label", "==", decodeURIComponent(label as string)));
+        const colecao = collection(db,tipo === "universal" || tipo === "colisoes" || tipo === "perfect" ? "hashing" : "datasets"); // Decide se vai buscar na coleção datasets ou hashing com base no tipo da simulação.
+        const q = query(colecao, where("label", "==", decodeURIComponent(label as string))); // Cria uma query filtrando pelo label da simulação
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const doc = snapshot.docs[0].data() as Simulacao;

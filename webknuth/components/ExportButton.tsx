@@ -15,10 +15,10 @@ type Simulacao = {
 };
 
 export const ExportButton = () => {
-  const [simulacoes, setSimulacoes] = useState<Simulacao[]>([]);
-  const [simulacaoSelecionada, setSimulacaoSelecionada] = useState<string>("");
-  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
-
+  const [simulacoes, setSimulacoes] = useState<Simulacao[]>([]); //simulacoes: lista das simulações vindas do Firebase.
+  const [simulacaoSelecionada, setSimulacaoSelecionada] = useState<string>(""); //simulacaoSelecionada: rótulo da simulação escolhida
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false); //isGeneratingLink: controla o estado do botão de gerar link.
+// vai carregar as simulacoes do firebase
   useEffect(() => {
     const fetchSimulacoes = async () => {
       const datasetsSnap = await getDocs(collection(db, 'datasets'));
@@ -32,8 +32,9 @@ export const ExportButton = () => {
 
     fetchSimulacoes();
   }, []);
+  // 👆🏼 Busca documentos das coleções datasets e hashing. Mapeia cada doc.data() para o tipo Simulacao. Junta os dois arrays e salva em simulacoes
 
-  const exportarDados = (formato: 'json' | 'csv') => {
+  const exportarDados = (formato: 'json' | 'csv') => { // exporta em json ou csv
     const simulacao = simulacoes.find(s => s.label === simulacaoSelecionada);
     if (!simulacao) {
       toast.error('❌ Simulação não encontrada');
@@ -52,7 +53,7 @@ export const ExportButton = () => {
     }
 
     const blob = new Blob([conteudo], { type: formato === 'json' ? 'application/json' : 'text/csv' });
-    const url = URL.createObjectURL(blob);
+    const url = URL.createObjectURL(blob); // Cria um URL temporário para o blob
     const link = document.createElement('a');
     link.href = url;
     link.download = nomeArquivo;
