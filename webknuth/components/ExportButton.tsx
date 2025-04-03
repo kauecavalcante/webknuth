@@ -78,7 +78,7 @@ export const ExportButton = () => {
 
     try {
       await navigator.clipboard.writeText(link);
-      toast.success(
+      toast.success( 
         <div className={styles.toastSuccess}>
           <FaLink /> Link copiado para a área de transferência!
           <div className={styles.linkPreview}>{link}</div>
