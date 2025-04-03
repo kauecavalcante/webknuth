@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useSimulacao } from "../../hooks/useSimulacao";
 
 interface Props {
   values: number[];
@@ -30,36 +31,29 @@ function buildBST(values: number[]): TreeNode | null {
 
 export default function BSTTree({ values }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
+  const currentValues = useSimulacao(values, 800); // Simulação gradual
 
   useEffect(() => {
-    const rootData = buildBST(values);
+    const rootData = buildBST(currentValues);
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
-    
-    // ======== Area do desenho ======== // 
+
     const width = 600;
     const height = 400;
     const margin = 50;
-
     svg.attr("width", width).attr("height", height);
-    // =================================== //
-    if (!rootData) return; // se nao tiver nada ele n desenha nenhuma arvore.
 
-    const root = d3.hierarchy(rootData, d =>
-        [d.left, d.right].filter((n): n is TreeNode => n !== null) // convertendo TreeNode em uma estrutura que o D3 consegue entende
-      )
-      
+    if (!rootData) return;
 
-    const treeLayout = d3
-      .tree<TreeNode>()
-      .size([width - margin * 2, height - margin * 2]);
+    const root = d3.hierarchy(rootData, (d) =>
+      [d.left, d.right].filter((n): n is TreeNode => n !== null)
+    );
+
+    const treeLayout = d3.tree<TreeNode>().size([width - margin * 2, height - margin * 2]);
     const tree = treeLayout(root);
 
-    const g = svg
-      .append("g")
-      .attr("transform", `translate(${margin}, ${margin})`);
+    const g = svg.append("g").attr("transform", `translate(${margin}, ${margin})`);
 
-    // linhas
     g.selectAll("line")
       .data(tree.links())
       .enter()
@@ -70,7 +64,6 @@ export default function BSTTree({ values }: Props) {
       .attr("y2", (d) => d.target.y)
       .attr("stroke", "#aaa");
 
-    // Circulo e o valor
     const nodeGroup = g
       .selectAll("g.node")
       .data(tree.descendants())
@@ -86,7 +79,7 @@ export default function BSTTree({ values }: Props) {
       .attr("dy", 5)
       .attr("text-anchor", "middle")
       .attr("fill", "white");
-  }, [values]);
+  }, [currentValues]);
 
   return <svg ref={svgRef}></svg>;
 }

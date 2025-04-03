@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Dataset } from "../../lib/types";
+import { useSimulacao } from "../../hooks/useSimulacao";
 
 interface Props {
     dataset: Dataset;
@@ -15,6 +16,9 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
     const [b, setB] = useState(0);
     const [p, setP] = useState(31);
     const [m, setM] = useState(dataset.data.length);
+
+    // Simulação de inserção gradual
+    const currentValues = useSimulacao(dataset.data, 800);
 
     // Tabela para sondagem linear: cada posição tem 1 valor ou null
     const [hashTable, setHashTable] = useState<(number | null)[]>([]);
@@ -30,7 +34,7 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
         // Cria um array de m posições, iniciando com null
         const table = new Array(m).fill(null);
 
-        dataset.data.forEach((value) => {
+        currentValues.forEach((value) => {
             // h(x) = ((a * x + b) mod p) mod m
             // Evita valores negativos em % (JS)
             let modP = (a * value + b) % p;
@@ -55,7 +59,7 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
         });
 
         setHashTable(table);
-    }, [a, b, p, m, dataset]);
+    }, [a, b, p, m, currentValues]);
 
     // Desenha a tabela no SVG
     useEffect(() => {

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import * as d3 from "d3";
+import { useSimulacao } from "../../hooks/useSimulacao"; 
 
 interface Props {
   values: number[];
@@ -9,12 +10,11 @@ interface Props {
 
 interface BTreeNode {
   keys: number[];
-  children: BTreeNode[]; // subárvores
-  leaf: boolean; // se é folha ou não
+  children: BTreeNode[];
+  leaf: boolean;
 }
 
-function insertBTree(values: number[]): BTreeNode {
-  const t = 2; // grau mínimo da B-Tree
+function buildBTree(values: number[], t: number): BTreeNode {
   let root: BTreeNode = { keys: [], children: [], leaf: true };
 
   function splitChild(parent: BTreeNode, i: number) {
@@ -70,8 +70,11 @@ function insertBTree(values: number[]): BTreeNode {
 export default function BTree({ values }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
 
+  const currentValues = useSimulacao(values, 1000); // Simulação passo a passo
+  const t = 2;
+
   useEffect(() => {
-    const rootData = insertBTree(values);
+    const rootData = buildBTree(currentValues, t);
     const svg = d3.select(svgRef.current);
     svg.selectAll("*").remove();
 
@@ -83,8 +86,8 @@ export default function BTree({ values }: Props) {
 
     function draw(node: BTreeNode, x: number, y: number, level: number) {
       const g = svg.append("g").attr("transform", `translate(${x}, ${y})`);
-
       const boxWidth = node.keys.length * 30;
+
       g.append("rect")
         .attr("width", boxWidth)
         .attr("height", 30)
@@ -118,8 +121,8 @@ export default function BTree({ values }: Props) {
       }
     }
 
-    draw(rootData, width / 2 - (values.length * 10), margin, 0);
-  }, [values]);
+    draw(rootData, width / 2 - (currentValues.length * 10), margin, 0);
+  }, [currentValues]);
 
   return <svg ref={svgRef}></svg>;
 }
