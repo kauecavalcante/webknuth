@@ -25,10 +25,10 @@ export default function Home() {
           <Link href="/export-test"><button style={styles.button}>Exportação</button></Link>
         </div>
 
-        {/* Imagem ao lado dos botões */}
+       
         <div style={styles.imageBox}>
           <Image
-            src="/estrutura.png" // Coloque sua imagem em public/estrutura.png
+            src="/estrutura.png" 
             alt="Ilustração Estruturas"
             width={300}
             height={300}
