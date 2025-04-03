@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { Dataset } from "../../lib/types";
 import { useSimulacao } from "../../hooks/useSimulacao";
 
@@ -8,6 +8,11 @@ interface Props {
     dataset: Dataset;
 }
 
+/**
+ * Visualiza o hashing universal, onde a função de hash é definida por:
+ *   h(x) = ((a * x + b) mod p) mod m
+ * e colisões são resolvidas por sondagem linear.
+ */
 export default function UniversalHashVisualizer({ dataset }: Props) {
     const svgRef = useRef<SVGSVGElement>(null);
 
@@ -17,51 +22,36 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
     const [p, setP] = useState(31);
     const [m, setM] = useState(dataset.data.length);
 
-    // Simulação de inserção gradual
+    // Simula a inserção gradual dos valores
     const currentValues = useSimulacao(dataset.data, 800);
 
-    // Tabela para sondagem linear: cada posição tem 1 valor ou null
-    const [hashTable, setHashTable] = useState<(number | null)[]>([]);
-
-    // Recalcula a tabela sempre que algum parâmetro mudar
-    useEffect(() => {
-        // Se p < 1 ou m < 1, não podemos fazer hashing
-        if (p < 1 || m < 1) {
-            setHashTable([]);
-            return;
-        }
-
-        // Cria um array de m posições, iniciando com null
-        const table = new Array(m).fill(null);
+    // Computa a tabela de hash usando a função universal e resolução por sondagem linear
+    const hashTable = useMemo<(number | null)[]>(() => {
+        if (p < 1 || m < 1) return [];
+        const table = new Array<number | null>(m).fill(null);
 
         currentValues.forEach((value) => {
-            // h(x) = ((a * x + b) mod p) mod m
-            // Evita valores negativos em % (JS)
+            // Calcula h(x) = ((a * x + b) mod p) mod m, garantindo não ter valor negativo
             let modP = (a * value + b) % p;
             if (modP < 0) modP += p;
-
             let idx = modP % m;
             let count = 0;
-
-            // Sondagem linear: se ocupado, avança
+            // Sondagem linear para resolução de colisões
             while (table[idx] !== null && count < m) {
                 idx = (idx + 1) % m;
                 count++;
             }
-
             if (count < m) {
-                // Encontrou posição livre
                 table[idx] = value;
             } else {
-                // Tabela cheia ou colisões demais
                 console.warn(`Valor ${value} não coube na tabela.`);
             }
         });
 
-        setHashTable(table);
+        return table;
     }, [a, b, p, m, currentValues]);
 
-    // Desenha a tabela no SVG
+    // Desenha a tabela de hash no SVG
     useEffect(() => {
         const svg = svgRef.current;
         if (!svg) return;
@@ -71,11 +61,12 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
             svg.removeChild(svg.firstChild);
         }
 
-        // Se p < 1 ou m < 1 => exibe aviso
+        const ns = "http://www.w3.org/2000/svg";
+
+        // Caso os parâmetros sejam inválidos, exibe mensagem de aviso
         if (p < 1 || m < 1) {
             svg.setAttribute("width", "600");
             svg.setAttribute("height", "60");
-            const ns = "http://www.w3.org/2000/svg";
             const text = document.createElementNS(ns, "text");
             text.setAttribute("x", "10");
             text.setAttribute("y", "30");
@@ -85,7 +76,7 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
             return;
         }
 
-        // Ajuste de layout
+        // Configura o layout da tabela
         const boxSize = 60;
         const spacing = 20;
         const width = m * (boxSize + spacing);
@@ -94,13 +85,11 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
         svg.setAttribute("width", width.toString());
         svg.setAttribute("height", height.toString());
 
-        const ns = "http://www.w3.org/2000/svg";
-
-        // Desenha cada posição (bucket)
+        // Desenha cada bucket da tabela de hash
         hashTable.forEach((value, index) => {
             const x = index * (boxSize + spacing);
 
-            // Retângulo do bucket
+            // Desenha o retângulo do bucket
             const rect = document.createElementNS(ns, "rect");
             rect.setAttribute("x", x.toString());
             rect.setAttribute("y", "40");
@@ -110,7 +99,7 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
             rect.setAttribute("stroke", "#000");
             svg.appendChild(rect);
 
-            // Texto do índice (acima do quadrado)
+            // Exibe o índice do bucket
             const indexText = document.createElementNS(ns, "text");
             indexText.setAttribute("x", (x + boxSize / 2).toString());
             indexText.setAttribute("y", "30");
@@ -119,16 +108,16 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
             indexText.textContent = `${index}`;
             svg.appendChild(indexText);
 
-            // Se houver valor, desenha no centro do quadrado
+            // Se houver valor, exibe-o centralizado no bucket
             if (value !== null) {
-                const text = document.createElementNS(ns, "text");
-                text.setAttribute("x", (x + boxSize / 2).toString());
-                text.setAttribute("y", "75");
-                text.setAttribute("text-anchor", "middle");
-                text.setAttribute("fill", "white");
-                text.setAttribute("font-size", "16");
-                text.textContent = value.toString();
-                svg.appendChild(text);
+                const valueText = document.createElementNS(ns, "text");
+                valueText.setAttribute("x", (x + boxSize / 2).toString());
+                valueText.setAttribute("y", "75");
+                valueText.setAttribute("text-anchor", "middle");
+                valueText.setAttribute("fill", "white");
+                valueText.setAttribute("font-size", "16");
+                valueText.textContent = value.toString();
+                svg.appendChild(valueText);
             }
         });
     }, [hashTable, p, m]);
@@ -143,26 +132,18 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
                     A função de hash universal é definida como: <br />
                     <code>h(x) = ((a * x + b) mod p) mod m</code>
                     <br />
-                    E resolvemos colisões por <strong>sondagem linear</strong>:
+                    E resolvemos colisões por <strong>sondagem linear</strong>.
                 </p>
                 <ul style={{ paddingLeft: "1.2rem", marginBottom: "1rem" }}>
                     <li><strong>a</strong>: Multiplicador</li>
-                    <li><strong>b</strong>: Deslocamento (offset)</li>
+                    <li><strong>b</strong>: Deslocamento</li>
                     <li><strong>p</strong>: Número primo (≥ 1)</li>
                     <li><strong>m</strong>: Tamanho da tabela (≥ 1)</li>
-                    <li><em>Sondagem Linear</em>: se o bucket estiver ocupado, avança para o próximo até encontrar vazio</li>
                 </ul>
             </div>
 
-            {/* Inputs para alterar a, b, p, m */}
-            <div
-                style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: "1.5rem",
-                    marginBottom: "2rem",
-                }}
-            >
+            {/* Inputs para alterar os parâmetros */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", marginBottom: "2rem" }}>
                 <div>
                     <label style={{ fontWeight: 600 }}>a:</label>
                     <input
@@ -201,7 +182,7 @@ export default function UniversalHashVisualizer({ dataset }: Props) {
                 </div>
             </div>
 
-            {/* Scroll horizontal, caso a tabela fique larga */}
+            {/* Área com scroll horizontal para a tabela, se necessário */}
             <div style={{ overflowX: "auto", margin: "0 auto", maxWidth: "90%" }}>
                 <svg ref={svgRef}></svg>
             </div>

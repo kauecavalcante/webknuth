@@ -9,11 +9,18 @@ import CollisionStrategiesVisualizer from "../components/hash/CollisionStrategie
 
 import styles from "../styles/bst.module.css";
 
+/**
+ * Página principal para visualização das diferentes estratégias de hashing.
+ * Permite selecionar o tipo de hash (Perfeito, Universal ou Resolução de Colisões)
+ * e escolher um conjunto de dados para visualização.
+ */
 export default function HashPage() {
+    // Estado que define a estratégia selecionada
     const [tipo, setTipo] = useState<"perfect" | "universal" | "colisoes">("perfect");
     const [datasets, setDatasets] = useState<Dataset[]>([]);
     const [selected, setSelected] = useState<Dataset | null>(null);
 
+    // Busca os conjuntos de dados de acordo com a estratégia selecionada
     useEffect(() => {
         const fetchDatasets = async () => {
             const q = query(collection(db, "hashing"), where("tipo", "==", tipo));
@@ -44,26 +51,12 @@ export default function HashPage() {
                     Visualização de Hashing
                 </h1>
 
-                {/* BLOCO DE SELEÇÃO DE ESTRATÉGIA E DATASETS */}
+                {/* Bloco de seleção de estratégia e conjunto de dados */}
                 {!selected ? (
-                    <div
-                        style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            gap: "1rem",
-                        }}
-                    >
-                        {/* Linha do label + select */}
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
+                        {/* Seletor de estratégia */}
                         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                            <label
-                                htmlFor="tipo"
-                                style={{
-                                    fontWeight: 600,
-                                    margin: 0,
-                                    fontSize: "1rem",
-                                }}
-                            >
+                            <label htmlFor="tipo" style={{ fontWeight: 600, margin: 0, fontSize: "1rem" }}>
                                 Estratégia:
                             </label>
                             <select
@@ -83,20 +76,14 @@ export default function HashPage() {
                             </select>
                         </div>
 
-                        {/* Título "Escolha um conjunto de dados" */}
+                        {/* Título para seleção do conjunto de dados */}
                         <div style={{ textAlign: "center" }}>
-                            <p
-                                style={{
-                                    fontWeight: 600,
-                                    margin: 0,
-                                    fontSize: "1rem",
-                                }}
-                            >
+                            <p style={{ fontWeight: 600, margin: 0, fontSize: "1rem" }}>
                                 Escolha um conjunto de dados:
                             </p>
                         </div>
 
-                        {/* Lista de datasets */}
+                        {/* Lista de conjuntos de dados */}
                         <ul
                             style={{
                                 listStyle: "none",
@@ -127,16 +114,14 @@ export default function HashPage() {
                         </ul>
                     </div>
                 ) : (
-                    // BLOCO DE VISUALIZAÇÃO SE UM DATASET FOI SELECIONADO
+                    // Visualização do conjunto de dados selecionado
                     <div style={{ textAlign: "center" }}>
                         <div style={{ marginBottom: "1rem" }}>
                             <h2 style={{ margin: 0 }}>{selected.label}</h2>
-                            <p style={{ margin: 0, color: "#555" }}>
-                                [{selected.data.join(", ")}]
-                            </p>
+                            <p style={{ margin: 0, color: "#555" }}>[{selected.data.join(", ")}]</p>
                         </div>
 
-                        {/* Visualização do hashing escolhido */}
+                        {/* Renderiza o visualizador de hashing de acordo com a estratégia selecionada */}
                         <div>
                             {tipo === "perfect" && <PerfectHashVisualizer dataset={selected} />}
                             {tipo === "universal" && <UniversalHashVisualizer dataset={selected} />}

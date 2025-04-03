@@ -1,50 +1,57 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 import { Dataset } from "../../lib/types";
-import { useSimulacao } from "../../hooks/useSimulacao"; 
+import { useSimulacao } from "../../hooks/useSimulacao";
 
 interface Props {
   dataset: Dataset;
 }
 
+/**
+ * Visualiza o hashing perfeito, onde cada valor é colocado na posição correspondente
+ * (sem colisões), de acordo com o índice original do conjunto de dados.
+ */
 export default function PerfectHashVisualizer({ dataset }: Props) {
   const svgRef = useRef<SVGSVGElement>(null);
-
-  // Hook para simular inserção gradual
+  // Simula a inserção gradual dos valores
   const currentValues = useSimulacao(dataset.data, 800);
+  // Define o tamanho da tabela com base na quantidade de dados
+  const tableSize = dataset.data.length;
+
+  // Como o hashing perfeito utiliza a própria ordem dos dados,
+  // o hashTable é simplesmente igual aos valores simulados.
+  const hashTable = useMemo<(number | null)[]>(() => {
+    const table = new Array<number | null>(tableSize).fill(null);
+    currentValues.forEach((value, index) => {
+      table[index] = value;
+    });
+    return table;
+  }, [currentValues, tableSize]);
 
   useEffect(() => {
     const svg = svgRef.current;
     if (!svg) return;
 
-    // Limpa SVG
-    while (svg.firstChild) svg.removeChild(svg.firstChild);
-
-    const data = currentValues;
-    const size = dataset.data.length; // Tamanho fixo da tabela 
-
-    // Função de hash perfeita: usar posição no array original
-    const hashTable: (number | null)[] = new Array(size).fill(null);
-    for (let i = 0; i < data.length; i++) {
-      hashTable[i] = data[i];
+    // Limpa o SVG antes de redesenhar
+    while (svg.firstChild) {
+      svg.removeChild(svg.firstChild);
     }
 
-    const boxSize = 60;
-    const spacing = 10;
-
-    const width = size * (boxSize + spacing);
+    const boxSize = 60; // Tamanho de cada célula da tabela
+    const spacing = 10; // Espaçamento entre as células
+    const width = tableSize * (boxSize + spacing);
     const height = 100;
+    const ns = "http://www.w3.org/2000/svg";
 
     svg.setAttribute("width", width.toString());
     svg.setAttribute("height", height.toString());
 
-    const ns = "http://www.w3.org/2000/svg";
-
+    // Desenha cada célula do hash
     hashTable.forEach((value, index) => {
       const x = index * (boxSize + spacing);
 
-      // Retângulo
+      // Retângulo representando o bucket
       const rect = document.createElementNS(ns, "rect");
       rect.setAttribute("x", x.toString());
       rect.setAttribute("y", "20");
@@ -54,7 +61,7 @@ export default function PerfectHashVisualizer({ dataset }: Props) {
       rect.setAttribute("stroke", "#000");
       svg.appendChild(rect);
 
-      // Texto: índice
+      // Exibe o índice acima do bucket
       const indexText = document.createElementNS(ns, "text");
       indexText.setAttribute("x", (x + boxSize / 2).toString());
       indexText.setAttribute("y", "15");
@@ -63,19 +70,19 @@ export default function PerfectHashVisualizer({ dataset }: Props) {
       indexText.textContent = `${index}`;
       svg.appendChild(indexText);
 
-      // Texto: valor
+      // Exibe o valor (se existir) centralizado no bucket
       if (value !== null) {
-        const text = document.createElementNS(ns, "text");
-        text.setAttribute("x", (x + boxSize / 2).toString());
-        text.setAttribute("y", "50");
-        text.setAttribute("text-anchor", "middle");
-        text.setAttribute("fill", "white");
-        text.setAttribute("font-size", "16");
-        text.textContent = value.toString();
-        svg.appendChild(text);
+        const valueText = document.createElementNS(ns, "text");
+        valueText.setAttribute("x", (x + boxSize / 2).toString());
+        valueText.setAttribute("y", "50");
+        valueText.setAttribute("text-anchor", "middle");
+        valueText.setAttribute("fill", "white");
+        valueText.setAttribute("font-size", "16");
+        valueText.textContent = value.toString();
+        svg.appendChild(valueText);
       }
     });
-  }, [currentValues, dataset]);
+  }, [hashTable, tableSize]);
 
   return (
     <div>
