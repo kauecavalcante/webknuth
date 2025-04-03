@@ -36,7 +36,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Tecnologias usadas */}
+      {/* Tecnologias usadas! */}
       <p style={styles.techs}>
         Tecnologias: React, TypeScript, Next.js, D3, vis-network, Firebase, CSS, JSX
       </p>
